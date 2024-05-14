@@ -1,0 +1,24 @@
+name: CI pipeline
+
+on: [push]
+
+env:
+  build_dir: build
+  cflags: -Werror
+
+jobs:
+
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Configure
+        run: >
+          cmake -B ${{env.build_dir}}
+          -DCMAKE_C_FLAGS='${{env.cflags}}'
+      - name: Build
+        run: cmake --build ${{env.build_dir}}
+      - name: Test
+        run: ${{env.build_dir}}/mylib-test
