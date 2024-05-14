@@ -45,3 +45,37 @@ jobs:
         run: cmake --build ${{env.build_dir}}
       - name: Test
         run: ${{env.build_dir}}/${{matrix.os.exe_prefix}}mylib-test
+
+  release:
+    name: Release
+    needs: [analyze, test]
+    if: startsWith(github.ref, 'refs/tags/v')
+    permissions:
+      contents: write
+    strategy:
+      matrix:
+        os:
+          - name: ubuntu
+            lib_in: mylib.a
+            lib_out: mylib-linux.a
+          - name: windows
+            lib_in: Release/mylib.lib
+            lib_out: mylib-windows.lib
+          - name: macos
+            lib_in: mylib.a
+            lib_out: mylib-macos.a
+    runs-on: ${{matrix.os.name}}-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Configure
+        run: cmake -B ${{env.build_dir}} -DCMAKE_BUILD_TYPE=Release
+      - name: Build
+        run: cmake --build ${{env.build_dir}} --config Release
+      - name: Rename
+        run: mv ${{env.build_dir}}/${{matrix.os.lib_in}} ${{env.build_dir}}/${{matrix.os.lib_out}}
+        shell: bash
+      - name: Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: ${{env.build_dir}}/${{matrix.os.lib_out}}
