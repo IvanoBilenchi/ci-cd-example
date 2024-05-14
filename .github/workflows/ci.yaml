@@ -4,7 +4,8 @@ on: [push]
 
 env:
   build_dir: build
-  cflags: -Werror
+  cflags: -Werror -fsanitize=address
+  lflags: -fsanitize=address
 
 jobs:
 
@@ -17,7 +18,9 @@ jobs:
 
       - name: Build
         run: |
-          cmake -B ${{env.build_dir}} -DCMAKE_C_FLAGS='${{env.cflags}}'
+          cmake -B ${{env.build_dir}} \
+            -DCMAKE_C_FLAGS='${{env.cflags}}' \
+            -DCMAKE_EXE_LINKER_FLAGS='${{env.lflags}}'
           cmake --build ${{env.build_dir}}
 
       - name: Test
