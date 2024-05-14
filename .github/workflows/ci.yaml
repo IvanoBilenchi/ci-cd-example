@@ -4,8 +4,6 @@ on: [push]
 
 env:
   build_dir: build
-  cflags: -Werror -fsanitize=address
-  lflags: -fsanitize=address
 
 jobs:
 
@@ -22,16 +20,28 @@ jobs:
 
   test:
     name: Test
-    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        os:
+          - name: ubuntu
+            cflags: -Werror -fsanitize=address
+            lflags: -fsanitize=address
+          - name: windows
+            cflags: /WX
+            exe_prefix: Debug/
+          - name: macos
+            cflags: -Werror -fsanitize=address
+            lflags: -fsanitize=address
+    runs-on: ${{matrix.os.name}}-latest
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
       - name: Configure
         run: >
           cmake -B ${{env.build_dir}}
-          -DCMAKE_C_FLAGS='${{env.cflags}}'
-          -DCMAKE_EXE_LINKER_FLAGS='${{env.lflags}}'
+          -DCMAKE_C_FLAGS='${{matrix.os.cflags}}'
+          -DCMAKE_EXE_LINKER_FLAGS='${{matrix.os.lflags}}'
       - name: Build
         run: cmake --build ${{env.build_dir}}
       - name: Test
-        run: ${{env.build_dir}}/mylib-test
+        run: ${{env.build_dir}}/${{matrix.os.exe_prefix}}mylib-test
