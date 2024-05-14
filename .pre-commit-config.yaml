@@ -6,3 +6,11 @@ repos:
       - id: trailing-whitespace
       - id: mixed-line-ending
       - id: end-of-file-fixer
+  - repo: https://github.com/pre-commit/mirrors-clang-format
+    rev: v22.1.3
+    hooks:
+      - id: clang-format
+  - repo: https://github.com/gitleaks/gitleaks
+    rev: v8.30.0
+    hooks:
+      - id: gitleaks
