@@ -9,6 +9,15 @@ env:
 
 jobs:
 
+  analyze:
+    name: Analyze
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Run clang-tidy
+        run: clang-tidy src/*.c test/*.c --warnings-as-errors='*' -- -Iinclude
+
   test:
     name: Test
     runs-on: ubuntu-latest
